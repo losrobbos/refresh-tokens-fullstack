@@ -4,12 +4,14 @@ export const JWT_TOKEN = { key: 'token', secret: process.env.JWT_SECRET, expiry:
 export const JWT_REFRESH = { key: 'refresh_token', secret: process.env.JWT_SECRET_REFRESH, expiry: '2m' }
 export const COOKIE_CONFIG_ACC = { 
   httpOnly: true, 
-  maxAge: 1000*60*10 // 10 min 
+  maxAge: 1000*60 // 1 min 
+  // maxAge: 1000*60*10 // 10 min 
 }
 export const COOKIE_CONFIG_REFRESH = {
   path: "/refresh",
   httpOnly: true, 
-  maxAge: 1000*60*10, // 10 min
+  maxAge: 1000*60*2, // 2 min
+  // maxAge: 1000*60*10, // 10 min
 }
 
 /**

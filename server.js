@@ -48,11 +48,9 @@ app.get("/refresh", (req, res, next) => {
   // refresh token there?
   if (!req.cookies[JWT_REFRESH.key]) {
     console.log('No refresh token provided');
-    res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
-    res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
-    let error = new Error('No refresh token provided');
-    error.status = 401; // Unauthorized
-    return next(error);
+    res.clearCookie(JWT_TOKEN.key) //, COOKIE_CONFIG_ACC)
+    res.clearCookie(JWT_REFRESH.key) //, COOKIE_CONFIG_REFRESH)
+    return res.status(401).json({ error: { message: 'No refresh token provided' }})
   }
 
   // check refresh token...
@@ -62,25 +60,22 @@ app.get("/refresh", (req, res, next) => {
     console.log("Refresh token decoded: ", refreshContent)
     generateTokenPair(refreshContent, res)
     console.log("Generated new pair of tokens")
-    res.send({ message: "Refreshed ya cookie. Play it safe, buddy" })
+    res.json({ message: "Refreshed ya cookie. Play it safe, buddy" })
   }
   // refresh token either invalid or expired -> reject & clear all auth cookies
   catch(err) {
     console.log("REFRESH TOKEN expired. Logging out + clearing cookies...")
-    res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
-    res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
-    res.send({ message: "Logged you out" })
-    // let error = new Error( err.message )
-    // error.status = 401 // Unauthorized
-    // next( error )
+    res.clearCookie(JWT_TOKEN.key)
+    res.clearCookie(JWT_REFRESH.key)
+    res.json({ error: { message: "Logged you out" }})
   }
 })
 
 
 // clear access + refresh token on logout
 app.get('/logout', (req, res, next) => {
-  res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
-  res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
+  res.clearCookie(JWT_TOKEN.key)
+  res.clearCookie(JWT_REFRESH.key)
   res.json({ message: "Logged out successfully" })
 })
 
@@ -91,7 +86,7 @@ app.get('/protected', auth, (req, res, next) => {
   console.log("Cookies: ", req.cookies)
 
   res.json({
-    message: 'You are allowed to pass! Enjoy the flight!',
+    message: 'You are allowed to pass! Enjoy the flight! Time: ' + Date.now(),
     cookies: req.cookies
   })
 
