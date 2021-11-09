@@ -48,8 +48,8 @@ app.get("/refresh", (req, res, next) => {
   // refresh token there?
   if (!req.cookies[JWT_REFRESH.key]) {
     console.log('No refresh token provided');
-    res.clearCookie(JWT_TOKEN.key) //, COOKIE_CONFIG_ACC)
-    res.clearCookie(JWT_REFRESH.key) //, COOKIE_CONFIG_REFRESH)
+    res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
+    res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
     return res.status(401).json({ error: { message: 'No refresh token provided' }})
   }
 
@@ -65,8 +65,8 @@ app.get("/refresh", (req, res, next) => {
   // refresh token either invalid or expired -> reject & clear all auth cookies
   catch(err) {
     console.log("REFRESH TOKEN expired. Logging out + clearing cookies...")
-    res.clearCookie(JWT_TOKEN.key)
-    res.clearCookie(JWT_REFRESH.key)
+    res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
+    res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
     res.json({ error: { message: "Logged you out" }})
   }
 })
@@ -74,8 +74,8 @@ app.get("/refresh", (req, res, next) => {
 
 // clear access + refresh token on logout
 app.get('/logout', (req, res, next) => {
-  res.clearCookie(JWT_TOKEN.key)
-  res.clearCookie(JWT_REFRESH.key)
+  res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
+  res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
   res.json({ message: "Logged out successfully" })
 })
 

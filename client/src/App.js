@@ -9,30 +9,8 @@ const axiosConfig = {
 axios.defaults.baseURL = axiosConfig.baseURL;
 axios.defaults.withCredentials = axiosConfig.withCredentials;
 
-// TODO: setup AXIOS interceptor listening for returned 401 codes
-// => if 401: call /refresh route then
-// => let refresh token expire
-// => that's it!
-
-// INTERCEPT all responses and check for auth fail
-// axios.interceptors.response.use(
-//   // handle success responses (2xx)
-//   (response) => {
-//     return response;
-//   },
-//   // handle error responses (400 and above)
-//   (error) => {
-//     console.log("Received error response")
-//     if (error.response.status === 401) {
-//       // TODO: do call to /refresh route (cookies will get passed automatically)
-
-//       // TODO: re-do original request 
-//     }
-//     return Promise.reject( error ); // reject AXIOS response so it can get handled in catch handler!
-//   }
-// );
-
 // Response interceptor for API calls
+// => will intercept expired tokens and try to refresh token by calling /refresh route...
 axios.interceptors.response.use(
   (response) => {
     return response
@@ -60,9 +38,6 @@ axios.interceptors.response.use(
         console.log("Refresh did not work out, prob no refresh cookie theeere!")
       }
       
-      // const access_token = await refreshAccessToken(); 
-      // axios.defaults.headers.common['Authorization'] = 'Bearer ' + access_token;
-      // return axiosApiInstance(originalRequest);
     }
     return Promise.reject(error);
   }
@@ -70,6 +45,7 @@ axios.interceptors.response.use(
 
 
 function App() {
+  
   const [ message, setMessage ] = useState('');
   const [ error, setError ] = useState('');
 
