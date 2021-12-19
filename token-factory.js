@@ -24,7 +24,7 @@ export const generateTokenPair = (user, res) => {
     { _id: user._id }, JWT_REFRESH.secret, { expiresIn: JWT_REFRESH.expiry } 
   )
 
-  // pin the visitor card to your dress (=attach cookie)
+  // attach the created tokens to the response as headers
   res.setHeader(JWT_TOKEN.key, token)
   res.setHeader(JWT_REFRESH.key, refreshToken)
 
