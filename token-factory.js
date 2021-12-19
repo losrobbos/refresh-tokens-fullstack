@@ -2,17 +2,6 @@ import jwt from "jsonwebtoken"
 
 export const JWT_TOKEN = { key: 'token', secret: process.env.JWT_SECRET, expiry: '1m' }
 export const JWT_REFRESH = { key: 'refresh_token', secret: process.env.JWT_SECRET_REFRESH, expiry: '2m' }
-export const COOKIE_CONFIG_ACC = { 
-  httpOnly: true, 
-  maxAge: 1000*60 // 1 min 
-  // maxAge: 1000*60*10 // 10 min 
-}
-export const COOKIE_CONFIG_REFRESH = {
-  path: "/refresh",
-  httpOnly: true, 
-  maxAge: 1000*60*2, // 2 min
-  // maxAge: 1000*60*10, // 10 min
-}
 
 /**
  * Generate a pair of ACCESS TOKEN + REFRESH TOKEN
@@ -36,8 +25,8 @@ export const generateTokenPair = (user, res) => {
   )
 
   // pin the visitor card to your dress (=attach cookie)
-  res.cookie(JWT_TOKEN.key, token, COOKIE_CONFIG_ACC)
-  res.cookie(JWT_REFRESH.key, refreshToken, COOKIE_CONFIG_REFRESH)
+  res.setHeader(JWT_TOKEN.key, token)
+  res.setHeader(JWT_REFRESH.key, refreshToken)
 
   return { token, refreshToken }
 }
