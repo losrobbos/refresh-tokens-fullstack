@@ -50,14 +50,18 @@ app.get("/refresh", (req, res, next) => {
     console.log("Checking refresh token...")
     const refreshContent = jwt.verify(req.headers[JWT_REFRESH.key], JWT_REFRESH.secret)
     console.log("Refresh token decoded: ", refreshContent)
-    generateTokenPair(refreshContent, res)
+    const { token, refreshToken } = generateTokenPair(refreshContent, res)
     console.log("Generated new pair of tokens")
-    res.json({ message: "Refreshed ya cookie. Play it safe, buddy" })
+    res.json({ 
+      message: "Refreshed ya cookie. Play it safe, buddy",
+      token,
+      refresh_token: refreshToken
+    })
   }
   // refresh token either invalid or expired -> reject call
   catch(err) {
     console.log("REFRESH TOKEN expired. Terminating...")
-    res.json({ error: { message: "Session expired" }})
+    res.status(401).json({ error: { message: "Session expired" }})
   }
 })
 
