@@ -1,22 +1,17 @@
 import './loadEnv.js'
 import express from 'express'
 import cors from "cors"
-import cookieParser from "cookie-parser"
 import jwt from "jsonwebtoken"
-import { COOKIE_CONFIG_ACC, COOKIE_CONFIG_REFRESH, JWT_TOKEN, JWT_REFRESH, generateTokenPair } from "./token-factory.js"
+import { JWT_TOKEN, JWT_REFRESH, generateTokenPair } from "./token-factory.js"
 import auth from './auth.js'
 
 const app = express();
 
-// ALLOW that cookies are sent to us
-app.use( cors({ origin: 'http://localhost:3000', credentials: true }) )
-app.use( cookieParser() )
+app.use( cors({ origin: process.env.FRONTEND_ORIGIN || 'http://localhost:3000' }) )
 app.use( express.json() )
 
 
-
 app.get('/', (req, res) => {
-  console.log("Cookies: ", req.cookies)
   res.send('<h2>Refresh Tokens here like hell, buddy');
 });
 
@@ -43,51 +38,42 @@ app.get('/login', (req, res, next) => {
 })
 
 app.get("/refresh", (req, res, next) => {
-  console.log("Cookies: ", req.cookies)
 
   // refresh token there?
-  if (!req.cookies[JWT_REFRESH.key]) {
+  if (!req.headers[JWT_REFRESH.key]) {
     console.log('No refresh token provided');
-    res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
-    res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
     return res.status(401).json({ error: { message: 'No refresh token provided' }})
   }
 
   // check refresh token...
   try {
     console.log("Checking refresh token...")
-    const refreshContent = jwt.verify(req.cookies[JWT_REFRESH.key], JWT_REFRESH.secret)
+    const refreshContent = jwt.verify(req.headers[JWT_REFRESH.key], JWT_REFRESH.secret)
     console.log("Refresh token decoded: ", refreshContent)
-    generateTokenPair(refreshContent, res)
+    const { token, refreshToken } = generateTokenPair(refreshContent, res)
     console.log("Generated new pair of tokens")
-    res.json({ message: "Refreshed ya cookie. Play it safe, buddy" })
+    res.json({ 
+      message: "Refreshed ya cookie. Play it safe, buddy",
+      token,
+      refresh_token: refreshToken
+    })
   }
-  // refresh token either invalid or expired -> reject & clear all auth cookies
+  // refresh token either invalid or expired -> reject call
   catch(err) {
-    console.log("REFRESH TOKEN expired. Logging out + clearing cookies...")
-    res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
-    res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
-    res.json({ error: { message: "Logged you out" }})
+    console.log("REFRESH TOKEN expired. Terminating...")
+    res.status(401).json({ error: { message: "Session expired" }})
   }
-})
-
-
-// clear access + refresh token on logout
-app.get('/logout', (req, res, next) => {
-  res.clearCookie(JWT_TOKEN.key, COOKIE_CONFIG_ACC)
-  res.clearCookie(JWT_REFRESH.key, COOKIE_CONFIG_REFRESH)
-  res.json({ message: "Logged out successfully" })
 })
 
 
 // protected resource
 app.get('/protected', auth, (req, res, next) => {
 
-  console.log("Cookies: ", req.cookies)
+  console.log("Token: ", req.headers[JWT_TOKEN.key])
 
   res.json({
     message: 'You are allowed to pass! Enjoy the flight! Time: ' + Date.now(),
-    cookies: req.cookies
+    token: req.headers[JWT_TOKEN.key]
   })
 
 })
